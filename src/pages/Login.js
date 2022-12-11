@@ -16,7 +16,7 @@ export default function Login() {
     username: yup
       .string()
       .required('Required')
-      .email("Invalid Email").typeError('you must specify a number'),
+      .email("Invalid Email").typeError('you must specify a numbers'),
     password: yup
       .string()
       .required('Required')
