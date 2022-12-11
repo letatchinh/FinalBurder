@@ -1,26 +1,34 @@
-import { Button, Paper, Stack, TextField, Typography } from '@mui/material'
-import { useMutation } from '@tanstack/react-query';
 import LoadingButton from '@mui/lab/LoadingButton';
-import React, { useEffect } from 'react'
+import { Button, Paper, Stack, TextField, Typography } from '@mui/material';
+import { useMutation } from '@tanstack/react-query';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import axiosClient from '../MyAxios/Axios';
 import { Link, useNavigate } from 'react-router-dom';
+// import FormLoginPhone from '../components/FormLoginPhone';
 import { LOCALSTORED_KEY } from '../constant/urlConstant';
-import FacebookLogin from 'react-facebook-login';
-import jwt_decode from "jwt-decode";
-
-import { GoogleLogin } from '@react-oauth/google';
-
+import { auth } from '../firebaseConfig.js';
+import axiosClient from '../MyAxios/Axios';
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup';
 export default function Login() {
-
-    const { register, handleSubmit, formState: { errors } } = useForm();
+  const schema = yup.object().shape({
+    username: yup
+      .string()
+      .required('Required')
+      .email("Invalid Email").typeError('you must specify a number'),
+    password: yup
+      .string()
+      .required('Required')
+  })
+    const { register, handleSubmit, formState: { errors } } = useForm({resolver: yupResolver(schema)});
     const navigate = useNavigate()
     const {mutate , isLoading} = useMutation({
       mutationFn: account => {
         return axiosClient.post('api/users', account)
       },
       onSuccess : (data) => {
-       localStorage.setItem(LOCALSTORED_KEY,JSON.stringify({id : data.data.id , name : data.data.name}))
+        localStorage.setItem(LOCALSTORED_KEY,JSON.stringify(data.data));
        navigate('/hamberger/')
       },
       onError : (data) => {
@@ -30,10 +38,21 @@ export default function Login() {
     })
 
   const onSubmit = (data) =>{
+signInWithEmailAndPassword(auth, data.username, data.password)
+  .then((userCredential) => {
+    console.log(userCredential);
     mutate(JSON.stringify({
       username : data.username,
       password : data.password
     }))
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.log(error);
+  });
+
+ 
   }
   
   const responseFacebook = (response) => {
@@ -45,7 +64,7 @@ export default function Login() {
 <form  style={{padding : '10px'}} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={2} alignItems='center'>
         <Typography variant='h6'>Sign In</Typography>
-      <TextField error={errors && errors.username !== undefined} helperText={errors.username && "User name must be Require"} fullWidth label='Username' variant="outlined"  {...register("username",{required : true})} />
+      <TextField error={errors && errors.username !== undefined} helperText={errors.username && errors.username.message} fullWidth label='Username' variant="outlined"  {...register("username",{required : true})} />
       <TextField type='password' error={errors && errors.password !== undefined} helperText={errors.password && "Password must be Require"} fullWidth label='Password' variant="outlined" {...register("password",{required : true})} />
       {errors.exampleRequired && <span>This field is required</span>}
       {isLoading ? 
@@ -74,6 +93,7 @@ export default function Login() {
   }}/> */}
       </Stack>
     </form>
+    {/* <FormLoginPhone /> */}
     </Paper>
   )
 }

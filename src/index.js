@@ -7,11 +7,8 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { store } from "./redux/store";
 import { Provider } from "react-redux";
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-
 const queryClient = new QueryClient();
 
 root.render(
@@ -19,9 +16,7 @@ root.render(
    <Provider store={store}>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-      <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
         <App />
-        </GoogleOAuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
     </Provider>
@@ -31,8 +26,4 @@ root.render(
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-// serviceWorkerRegistration.register();
 reportWebVitals();
-serviceWorkerRegistration.register()
-
-// serviceWorkerRegistration.unregister();
